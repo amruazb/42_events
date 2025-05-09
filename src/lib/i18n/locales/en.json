@@ -1,0 +1,42 @@
+
+{
+  "app": {
+    "name": "42 Abu Dhabi Events",
+    "tagline": "Connect, Learn, & Grow Together"
+  },
+  "nav": {
+    "home": "Home",
+    "events": "Events",
+    "about": "About",
+    "contact": "Contact",
+    "login": "Login"
+  },
+  "languages": {
+    "en": "English",
+    "ar": "العربية",
+    "fr": "Français"
+  },
+  "home": {
+    "welcome": "Welcome to 42 Abu Dhabi Events",
+    "subtitle": "Discover exciting tech events and opportunities",
+    "upcomingEvents": "Upcoming Events",
+    "viewAll": "View All Events",
+    "search": "Search events...",
+    "noEvents": "No events found"
+  },
+  "event": {
+    "date": "Date",
+    "time": "Time",
+    "location": "Location",
+    "register": "Register",
+    "details": "Event Details",
+    "organizer": "Organizer",
+    "attendees": "Attendees",
+    "viewMore": "View More"
+  },
+  "footer": {
+    "rights": "© 2025 42 Abu Dhabi. All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
+  }
+}
