@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Upload, Download, FileText } from "lucide-react"
+import { Upload, Download, FileText, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,7 +12,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/components/ui/use-toast"
 import { useLanguage } from "@/components/language-provider"
 import { Import42Events } from "@/components/admin/import-42-events"
-import { Calendar } from "@/components/ui/calendar"
 
 export function AdminImportExport() {
   const router = useRouter()
