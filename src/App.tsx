@@ -16,6 +16,7 @@ import ContactPage from "./pages/ContactPage";
 import AdminPage from "./pages/AdminPage";
 import NotFound from "./pages/NotFound";
 
+
 // Create a new query client
 const queryClient = new QueryClient();
 
