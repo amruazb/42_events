@@ -4,11 +4,11 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, MapPin, Users, Terminal } from "lucide-react"
+import { Calendar, MapPin, Users, Terminal, ArrowRight } from "lucide-react"
 import { useLanguage } from "@/components/language-provider"
 import { format } from "date-fns"
 import { enUS, ar, fr } from "date-fns/locale"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface Event {
   _id: string
@@ -138,65 +138,90 @@ export function EventList({ initialEvents = [], limit, upcoming, category }: Eve
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {filteredEvents.map((event, index) => (
-        <motion.div
-          key={event._id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: index * 0.1 }}
-        >
-          <Card className="bg-[#1A1A1A] border-[#00BABC]/20 hover:border-[#00BABC] transition-all duration-300 hover:shadow-[0_0_15px_rgba(0,186,188,0.2)]">
-            {event.image && (
-              <div className="relative h-48 w-full overflow-hidden">
-                <img
-                  src={event.image}
-                  alt={event.title[language]}
-                  className="object-cover w-full h-full"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] to-transparent" />
-              </div>
-            )}
-            <CardHeader>
-              <CardTitle className="font-mono text-[#00BABC]">{event.title[language]}</CardTitle>
-              <CardDescription className="line-clamp-2 text-gray-400 font-mono">
-                {event.description[language]}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex items-center text-sm text-gray-400 font-mono">
-                <Calendar className="mr-2 h-4 w-4 text-[#00BABC]" />
-                {format(new Date(event.startDate), "PPP", {
-                  locale: dateLocales[language],
-                })}
-              </div>
-              <div className="flex items-center text-sm text-gray-400 font-mono">
-                <MapPin className="mr-2 h-4 w-4 text-[#00BABC]" />
-                {event.location[language]}
-              </div>
-              {event.capacity && (
-                <div className="flex items-center text-sm text-gray-400 font-mono">
-                  <Users className="mr-2 h-4 w-4 text-[#00BABC]" />
-                  {event.registrations || 0} / {event.capacity}
+      <AnimatePresence>
+        {filteredEvents.map((event, index) => (
+          <motion.div
+            key={event._id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3, delay: index * 0.1 }}
+            whileHover={{ y: -5 }}
+            className="group"
+          >
+            <Card className="bg-[#1A1A1A] border-[#00BABC]/20 hover:border-[#00BABC] transition-all duration-300 hover:shadow-[0_0_15px_rgba(0,186,188,0.2)] h-full flex flex-col">
+              {event.image && (
+                <div className="relative h-48 w-full overflow-hidden">
+                  <motion.img
+                    src={event.image}
+                    alt={event.title[language]}
+                    className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
+                    whileHover={{ scale: 1.1 }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] to-transparent" />
+                  <motion.div
+                    className="absolute inset-0 bg-[#00BABC]/0 group-hover:bg-[#00BABC]/10 transition-colors duration-300"
+                    whileHover={{ backgroundColor: "rgba(0, 186, 188, 0.1)" }}
+                  />
                 </div>
               )}
-            </CardContent>
-            <CardFooter>
-              <div className="flex items-center justify-between w-full">
-                <Badge variant="secondary" className="bg-[#00BABC]/10 text-[#00BABC] font-mono">
-                  {event.category}
-                </Badge>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="border-[#00BABC] text-[#00BABC] hover:bg-[#00BABC]/10 font-mono"
+              <CardHeader>
+                <CardTitle className="font-mono text-[#00BABC] group-hover:text-[#00BABC]/90 transition-colors">
+                  {event.title[language]}
+                </CardTitle>
+                <CardDescription className="line-clamp-2 text-gray-400 font-mono group-hover:text-gray-300 transition-colors">
+                  {event.description[language]}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2 flex-grow">
+                <motion.div 
+                  className="flex items-center text-sm text-gray-400 font-mono group-hover:text-gray-300 transition-colors"
+                  whileHover={{ x: 5 }}
                 >
-                  {t("view_details")}
-                </Button>
-              </div>
-            </CardFooter>
-          </Card>
-        </motion.div>
-      ))}
+                  <Calendar className="mr-2 h-4 w-4 text-[#00BABC]" />
+                  {format(new Date(event.startDate), "PPP", {
+                    locale: dateLocales[language],
+                  })}
+                </motion.div>
+                <motion.div 
+                  className="flex items-center text-sm text-gray-400 font-mono group-hover:text-gray-300 transition-colors"
+                  whileHover={{ x: 5 }}
+                >
+                  <MapPin className="mr-2 h-4 w-4 text-[#00BABC]" />
+                  {event.location[language]}
+                </motion.div>
+                {event.capacity && (
+                  <motion.div 
+                    className="flex items-center text-sm text-gray-400 font-mono group-hover:text-gray-300 transition-colors"
+                    whileHover={{ x: 5 }}
+                  >
+                    <Users className="mr-2 h-4 w-4 text-[#00BABC]" />
+                    {event.registrations || 0} / {event.capacity}
+                  </motion.div>
+                )}
+              </CardContent>
+              <CardFooter>
+                <div className="flex items-center justify-between w-full">
+                  <Badge 
+                    variant="secondary" 
+                    className="bg-[#00BABC]/10 text-[#00BABC] font-mono group-hover:bg-[#00BABC]/20 transition-colors"
+                  >
+                    {event.category}
+                  </Badge>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="border-[#00BABC] text-[#00BABC] hover:bg-[#00BABC]/10 font-mono group-hover:bg-[#00BABC]/20 transition-all duration-300"
+                  >
+                    {t("view_details")}
+                    <ArrowRight className="ml-2 h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </Button>
+                </div>
+              </CardFooter>
+            </Card>
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>
   )
 }
