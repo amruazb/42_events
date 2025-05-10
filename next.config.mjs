@@ -1,12 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'standalone',
   images: {
     domains: ['api.intra.42.fr', 'cdn.intra.42.fr'],
     unoptimized: true,
   },
-  // Remove i18n config as it's not supported in App Router
+  // Remove i18n config as we're using middleware for internationalization
   experimental: {
     // Fix serverActions to be an object instead of boolean
     serverActions: {
@@ -19,6 +18,8 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Ensure output directory is .next
+  distDir: '.next',
 };
 
 export default nextConfig;
