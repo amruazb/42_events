@@ -1,16 +1,14 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
-import { EventCard } from "@/components/event-card"
-import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Search } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Calendar, MapPin, Users, Terminal } from "lucide-react"
 import { useLanguage } from "@/components/language-provider"
-import { Skeleton } from "@/components/ui/skeleton"
+import { format } from "date-fns"
+import { enUS, ar, fr } from "date-fns/locale"
+import { motion } from "framer-motion"
 
 interface Event {
   _id: string
@@ -33,211 +31,172 @@ interface Event {
   endDate: string
   category: string
   image?: string
+  capacity?: number
+  registrations?: number
 }
 
-export function EventList({ initialEvents = [] }: { initialEvents?: Event[] }) {
-  const { t, language } = useLanguage()
-  const searchParams = useSearchParams()
+interface EventListProps {
+  initialEvents?: Event[]
+  limit?: number
+  upcoming?: boolean
+  category?: string
+}
 
+const dateLocales = {
+  en: enUS,
+  ar: ar,
+  fr: fr,
+}
+
+export function EventList({ initialEvents = [], limit, upcoming, category }: EventListProps) {
   const [events, setEvents] = useState<Event[]>(Array.isArray(initialEvents) ? initialEvents : [])
   const [filteredEvents, setFilteredEvents] = useState<Event[]>(Array.isArray(initialEvents) ? initialEvents : [])
-  const [searchQuery, setSearchQuery] = useState("")
   const [isLoading, setIsLoading] = useState(!Array.isArray(initialEvents) || initialEvents.length === 0)
-  const [activeTab, setActiveTab] = useState("upcoming")
-  const [activeFilter, setActiveFilter] = useState("all")
+  const [error, setError] = useState<string | null>(null)
+  const { language, t } = useLanguage()
 
-  // Fetch events if not provided
   useEffect(() => {
     const fetchEvents = async () => {
-      if (!Array.isArray(initialEvents) || initialEvents.length === 0) {
+      try {
         setIsLoading(true)
-        try {
-          const response = await fetch("/api/events")
-          const data = await response.json()
-          if (Array.isArray(data)) {
-            setEvents(data)
-            setFilteredEvents(data)
-          } else {
-            console.error("Invalid events data received:", data)
-            setEvents([])
-            setFilteredEvents([])
-          }
-        } catch (error) {
-          console.error("Error fetching events:", error)
-          setEvents([])
-          setFilteredEvents([])
-        } finally {
-          setIsLoading(false)
+        setError(null)
+
+        const params = new URLSearchParams()
+        if (limit) params.append("limit", limit.toString())
+        if (upcoming) params.append("upcoming", "true")
+        if (category) params.append("category", category)
+
+        const response = await fetch(`/api/events?${params.toString()}`)
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
         }
+
+        const data = await response.json()
+        if (!Array.isArray(data)) {
+          console.error("Invalid events data received:", data)
+          throw new Error("Invalid data format received from server")
+        }
+
+        setEvents(data)
+        setFilteredEvents(data)
+      } catch (err) {
+        console.error("Error fetching events:", err)
+        setError(err instanceof Error ? err.message : "Failed to fetch events")
+      } finally {
+        setIsLoading(false)
       }
     }
 
-    fetchEvents()
-  }, [initialEvents])
-
-  // Apply search and filters
-  useEffect(() => {
-    const category = searchParams.get("category")
-    if (category) {
-      setActiveFilter(category)
+    if (!Array.isArray(initialEvents) || initialEvents.length === 0) {
+      fetchEvents()
     }
+  }, [initialEvents, limit, upcoming, category])
 
-    const query = searchParams.get("q")
-    if (query) {
-      setSearchQuery(query)
-    }
-
-    // Filter events based on search query, tab, and category filter
-    let filtered = Array.isArray(events) ? [...events] : []
-
-    // Filter by tab (upcoming or past)
-    const now = new Date()
-    if (activeTab === "upcoming") {
-      filtered = filtered.filter((event) => event && new Date(event.startDate) >= now)
-    } else {
-      filtered = filtered.filter((event) => event && new Date(event.startDate) < now)
-    }
-
-    // Filter by category
-    if (activeFilter !== "all") {
-      filtered = filtered.filter((event) => event && event.category?.toLowerCase() === activeFilter.toLowerCase())
-    }
-
-    // Filter by search query
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (event) =>
-          event &&
-          event.title?.[language]?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          event.description?.[language]?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          event.location?.[language]?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    }
-
-    // Sort by date (upcoming: soonest first, past: most recent first)
-    filtered = filtered.sort((a, b) => {
-      if (activeTab === "upcoming") {
-        return new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
-      } else {
-        return new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
-      }
-    })
-
-    setFilteredEvents(filtered)
-  }, [events, searchQuery, activeTab, activeFilter, searchParams, language])
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
+  if (isLoading) {
+    return (
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {[...Array(3)].map((_, i) => (
+          <Card key={i} className="bg-[#1A1A1A] border-[#00BABC]/20 animate-pulse">
+            <CardHeader>
+              <div className="h-6 bg-[#00BABC]/10 rounded w-3/4 mb-2" />
+              <div className="h-4 bg-[#00BABC]/10 rounded w-1/2" />
+            </CardHeader>
+            <CardContent>
+              <div className="h-4 bg-[#00BABC]/10 rounded w-full mb-2" />
+              <div className="h-4 bg-[#00BABC]/10 rounded w-5/6" />
+            </CardContent>
+            <CardFooter>
+              <div className="h-8 bg-[#00BABC]/10 rounded w-1/3" />
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    )
   }
 
-  const handleTabChange = (value: string) => {
-    setActiveTab(value)
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-[#00BABC] mb-4 font-mono">{error}</p>
+        <Button 
+          onClick={() => window.location.reload()}
+          className="bg-[#00BABC] hover:bg-[#00BABC]/90 text-white font-mono"
+        >
+          Retry
+        </Button>
+      </div>
+    )
   }
 
-  const handleFilterChange = (value: string) => {
-    setActiveFilter(value)
+  if (!Array.isArray(filteredEvents) || filteredEvents.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-400 font-mono">{t("no_events")}</p>
+      </div>
+    )
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-grow">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder={t("search")} value={searchQuery} onChange={handleSearch} className="pl-9" />
-        </div>
-
-        <div className="flex gap-2">
-          <Button
-            variant={activeFilter === "all" ? "default" : "outline"}
-            size="sm"
-            onClick={() => handleFilterChange("all")}
-          >
-            {t("all")}
-          </Button>
-          <Button
-            variant={activeFilter === "workshop" ? "default" : "outline"}
-            size="sm"
-            onClick={() => handleFilterChange("workshop")}
-          >
-            {t("workshop")}
-          </Button>
-          <Button
-            variant={activeFilter === "hackathon" ? "default" : "outline"}
-            size="sm"
-            onClick={() => handleFilterChange("hackathon")}
-          >
-            {t("hackathon")}
-          </Button>
-          <Button
-            variant={activeFilter === "meetup" ? "default" : "outline"}
-            size="sm"
-            onClick={() => handleFilterChange("meetup")}
-          >
-            {t("meetup")}
-          </Button>
-        </div>
-      </div>
-
-      <Tabs defaultValue="upcoming" onValueChange={handleTabChange}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="upcoming">{t("upcoming_events")}</TabsTrigger>
-          <TabsTrigger value="past">{t("past_events")}</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="upcoming" className="mt-6">
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div key={index} className="space-y-3">
-                  <Skeleton className="h-48 w-full" />
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-2/3" />
-                  <Skeleton className="h-10 w-full" />
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {filteredEvents.map((event, index) => (
+        <motion.div
+          key={event._id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: index * 0.1 }}
+        >
+          <Card className="bg-[#1A1A1A] border-[#00BABC]/20 hover:border-[#00BABC] transition-all duration-300 hover:shadow-[0_0_15px_rgba(0,186,188,0.2)]">
+            {event.image && (
+              <div className="relative h-48 w-full overflow-hidden">
+                <img
+                  src={event.image}
+                  alt={event.title[language]}
+                  className="object-cover w-full h-full"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] to-transparent" />
+              </div>
+            )}
+            <CardHeader>
+              <CardTitle className="font-mono text-[#00BABC]">{event.title[language]}</CardTitle>
+              <CardDescription className="line-clamp-2 text-gray-400 font-mono">
+                {event.description[language]}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="flex items-center text-sm text-gray-400 font-mono">
+                <Calendar className="mr-2 h-4 w-4 text-[#00BABC]" />
+                {format(new Date(event.startDate), "PPP", {
+                  locale: dateLocales[language],
+                })}
+              </div>
+              <div className="flex items-center text-sm text-gray-400 font-mono">
+                <MapPin className="mr-2 h-4 w-4 text-[#00BABC]" />
+                {event.location[language]}
+              </div>
+              {event.capacity && (
+                <div className="flex items-center text-sm text-gray-400 font-mono">
+                  <Users className="mr-2 h-4 w-4 text-[#00BABC]" />
+                  {event.registrations || 0} / {event.capacity}
                 </div>
-              ))}
-            </div>
-          ) : filteredEvents.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredEvents.map((event) => (
-                <EventCard key={event._id} event={event} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">{t("no_events")}</p>
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="past" className="mt-6">
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div key={index} className="space-y-3">
-                  <Skeleton className="h-48 w-full" />
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-2/3" />
-                  <Skeleton className="h-10 w-full" />
-                </div>
-              ))}
-            </div>
-          ) : filteredEvents.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredEvents.map((event) => (
-                <EventCard key={event._id} event={event} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">{t("no_events")}</p>
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+              )}
+            </CardContent>
+            <CardFooter>
+              <div className="flex items-center justify-between w-full">
+                <Badge variant="secondary" className="bg-[#00BABC]/10 text-[#00BABC] font-mono">
+                  {event.category}
+                </Badge>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="border-[#00BABC] text-[#00BABC] hover:bg-[#00BABC]/10 font-mono"
+                >
+                  {t("view_details")}
+                </Button>
+              </div>
+            </CardFooter>
+          </Card>
+        </motion.div>
+      ))}
     </div>
   )
 }
