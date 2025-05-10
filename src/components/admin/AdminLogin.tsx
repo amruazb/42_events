@@ -1,9 +1,12 @@
-
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+
+const FORTY_TWO_AUTH_URL = "https://api.intra.42.fr/oauth/authorize";
+const CLIENT_ID = "u-s4t2ud-90a7fe45a22821871b6f758cd2b2f0f7054566460b5702187d52588be1c4a0c7";
+const REDIRECT_URI = "http://localhost/8080/admin";
 
 interface AdminLoginProps {
   onLogin: (e: React.FormEvent) => void;
@@ -11,6 +14,15 @@ interface AdminLoginProps {
 
 const AdminLogin = ({ onLogin }: AdminLoginProps) => {
   const { t } = useTranslation();
+
+  const handle42Login = (e: React.FormEvent) => {
+    e.preventDefault();
+    const authUrl = new URL(FORTY_TWO_AUTH_URL);
+    authUrl.searchParams.append("client_id", CLIENT_ID);
+    authUrl.searchParams.append("redirect_uri", REDIRECT_URI);
+    authUrl.searchParams.append("response_type", "code");
+    window.location.href = authUrl.toString();
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -21,7 +33,7 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
           <h1 className="text-3xl font-bold mb-6 text-center text-primary">{t('admin.login')}</h1>
           <p className="text-white mb-6 text-center">{t('admin.loginDescription')}</p>
           
-          <form onSubmit={onLogin} className="space-y-4">
+          <form onSubmit={handle42Login} className="space-y-4">
             <Button 
               type="submit"
               className="w-full bg-primary hover:bg-primary/90 text-white"

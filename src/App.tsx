@@ -1,4 +1,3 @@
-
 import React from "react"; // Add explicit React import
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -15,6 +14,7 @@ import EventDetailPage from "./pages/EventDetailPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import AdminPage from "./pages/AdminPage";
+import AdminCallback from "./pages/AdminCallback";
 import NotFound from "./pages/NotFound";
 
 // Create a new query client
@@ -33,6 +33,7 @@ const App = () => (
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/admin" element={<AdminPage />} />
+              <Route path="/admin/callback" element={<AdminCallback />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
