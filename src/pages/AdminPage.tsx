@@ -1,6 +1,6 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
@@ -12,27 +12,76 @@ import AdminExport from "@/components/admin/AdminExport";
 import { useEvents } from "@/hooks/useEvents";
 import { Images, Upload, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { exchangeCodeForToken, getUserInfo } from "@/lib/auth";
 
 const AdminPage = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { events } = useEvents();
-  
-  // Temporary mock login function (to be replaced with OAuth)
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Mock successful authentication
-    setIsAuthenticated(true);
+
+  useEffect(() => {
+    const handleOAuthCallback = async () => {
+      const code = searchParams.get("code");
+      const error = searchParams.get("error");
+
+      if (error) {
+        console.error("OAuth error:", error);
+        toast({
+          title: "Authentication failed",
+          description: "There was an error during authentication.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!code) {
+        return;
+      }
+
+      try {
+        const tokenResponse = await exchangeCodeForToken(code);
+        const userInfo = await getUserInfo(tokenResponse.access_token);
+
+        // Store the tokens and user info in localStorage
+        localStorage.setItem("access_token", tokenResponse.access_token);
+        localStorage.setItem("refresh_token", tokenResponse.refresh_token);
+        localStorage.setItem("user_info", JSON.stringify(userInfo));
+
+        setIsAuthenticated(true);
+        toast({
+          title: "Logged in successfully",
+          description: "Welcome to the admin dashboard.",
+          variant: "default",
+        });
+      } catch (error) {
+        console.error("Error during authentication:", error);
+        toast({
+          title: "Authentication failed",
+          description: "There was an error during authentication.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    handleOAuthCallback();
+  }, [searchParams, toast]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("user_info");
+    setIsAuthenticated(false);
     toast({
-      title: "Logged in successfully",
-      description: "Welcome to the admin dashboard.",
+      title: "Logged out",
+      description: "You have been logged out successfully.",
       variant: "default",
     });
   };
 
   if (!isAuthenticated) {
-    return <AdminLogin onLogin={handleLogin} />;
+    return <AdminLogin onLogin={() => {}} />;
   }
 
   // Content for the authenticated admin view
@@ -46,7 +95,7 @@ const AdminPage = () => {
             <h1 className="text-3xl font-bold text-primary">{t('admin.dashboard')}</h1>
             <Button 
               variant="outline" 
-              onClick={() => setIsAuthenticated(false)}
+              onClick={handleLogout}
               className="border-primary text-primary hover:bg-primary/10"
             >
               {t('admin.logout')}

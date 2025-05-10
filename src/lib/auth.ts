@@ -1,7 +1,7 @@
 const FORTY_TWO_TOKEN_URL = "https://api.intra.42.fr/oauth/token";
 const CLIENT_ID = import.meta.env.VITE_FORTY_TWO_CLIENT_ID;
 const CLIENT_SECRET = import.meta.env.VITE_FORTY_TWO_CLIENT_SECRET;
-const REDIRECT_URI = import.meta.env.VITE_FORTY_TWO_REDIRECT_URI;
+const REDIRECT_URI = "https://42-events-iota.vercel.app/admin";
 
 interface TokenResponse {
   access_token: string;
