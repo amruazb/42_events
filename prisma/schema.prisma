@@ -1,0 +1,13 @@
+model Review {
+  id          String   @id @default(cuid())
+  eventId     String
+  eventName   String
+  answers     Json
+  userId      String?
+  isAnonymous Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([eventId])
+  @@index([userId])
+} 

@@ -4,6 +4,7 @@ import { Calendar, Users, MapPin, ArrowRight } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import EventList from "@/components/EventList";
+import EventReview from "@/components/EventReview";
 import { useEvents } from "@/hooks/useEvents";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -14,6 +15,9 @@ const Index = () => {
   const { events, loading, error } = useEvents();
   const { currentLanguage } = useLanguage();
   const isRTL = currentLanguage === 'ar';
+
+  // Get the most recent event for review
+  const recentEvent = events?.[0];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -167,6 +171,27 @@ const Index = () => {
             </div>
           </div>
         </section>
+
+        {/* Review Section */}
+        {recentEvent && (
+          <section className="py-20 bg-muted/50">
+            <div className="container mx-auto px-4">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-bold mb-4">Share Your Feedback</h2>
+                <p className="text-muted-foreground max-w-2xl mx-auto">
+                  Help us improve by sharing your thoughts about our recent events
+                </p>
+              </div>
+              
+              <div className="max-w-2xl mx-auto">
+                <EventReview 
+                  eventId={recentEvent.id}
+                  eventName={recentEvent.name}
+                />
+              </div>
+            </div>
+          </section>
+        )}
       </main>
 
       <Footer />
