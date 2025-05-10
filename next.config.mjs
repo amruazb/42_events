@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  output: 'standalone',
   images: {
     domains: ['api.intra.42.fr', 'cdn.intra.42.fr'],
     unoptimized: true,
