@@ -54,6 +54,9 @@ export function Header() {
           <Link to="/contact" className="text-white hover:text-primary transition-colors">
             {t('nav.contact')}
           </Link>
+          <Link to="/admin" className="text-white hover:text-primary transition-colors">
+            Admin
+          </Link>
           <LanguageSwitcher />
           <Button className="bg-primary hover:bg-primary/90 text-white">{t('nav.login')}</Button>
         </nav>
@@ -89,6 +92,13 @@ export function Header() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 {t('nav.contact')}
+              </Link>
+              <Link 
+                to="/admin" 
+                className="text-lg text-white hover:text-primary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Admin
               </Link>
               <div className="flex items-center mt-4">
                 <LanguageSwitcher />

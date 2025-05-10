@@ -1,107 +1,73 @@
-# 42_events
-# 42 Abu Dhabi Event Management Website
+# Welcome to your Lovable project
 
-This repository contains the source code for a responsive, multilingual event management website tailored specifically for the 42 Abu Dhabi community. It supports English, Arabic (RTL), and French languages and utilizes official 42 Abu Dhabi branding and colors.
+## Project info
 
-## 🎯 Project Overview
+**URL**: https://lovable.dev/projects/df0c71cc-e4c1-4bda-a2ba-5ec641cd68bb
 
-This web application allows users to view, search, and filter upcoming events effortlessly. Admins have secure access to manage events, including CRUD operations, bulk CSV uploads, and event data export. Real-time synchronization and offline caching functionalities enhance user experience.
+## How can I edit this code?
 
-## 🌐 Live Deployment
+There are several ways of editing your application.
 
-* **Live URL**: \[Insert your deployed URL here]
+**Use Lovable**
 
-## 🚀 Features
+Simply visit the [Lovable Project](https://lovable.dev/projects/df0c71cc-e4c1-4bda-a2ba-5ec641cd68bb) and start prompting.
 
-* **Multilingual support:** English, Arabic (RTL), French
-* **Responsive UI:** Optimized for mobile, tablet, and desktop
-* **Event management:** Create, edit, delete, bulk upload (CSV)
-* **Real-time synchronization:** Immediate event updates across tabs
-* **Secure OAuth login:** Integrated with 42 OAuth
-* **Offline support:** Progressive Web App functionality (cached data)
-* **Event export:** CSV and calendar (.ics) file downloads
+Changes made via Lovable will be committed automatically to this repo.
 
-## 🎨 Official Colors
+**Use your preferred IDE**
 
-* Primary: `#00BABC` (Cyan)
-* Secondary/Text: `#FFFFFF` (White)
-* Background: `#121212` (Dark Charcoal)
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-## 🛠️ Tech Stack
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-* **Frontend:** ReactJS, Tailwind CSS
-* **Backend:** Firebase Firestore
-* **Authentication:** 42 OAuth
-* **Multilingual Support:** React-i18next
-* **Deployment:** Vercel or Netlify
+Follow these steps:
 
-## 📌 Installation & Setup
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
 
-### Prerequisites
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
 
-* Node.js (v16+ recommended)
-* npm or yarn
+# Step 3: Install the necessary dependencies.
+npm i
 
-### Steps
-
-1. Clone the repository:
-
-```bash
-git clone [repository URL]
-cd 42-event-management
-```
-
-2. Install dependencies:
-
-```bash
-npm install
-```
-
-3. Configure environment variables:
-
-Create a `.env` file in your root directory and add:
-
-```env
-REACT_APP_FIREBASE_API_KEY=
-REACT_APP_FIREBASE_AUTH_DOMAIN=
-REACT_APP_FIREBASE_PROJECT_ID=
-REACT_APP_FIREBASE_STORAGE_BUCKET=
-REACT_APP_FIREBASE_MESSAGING_SENDER_ID=
-REACT_APP_FIREBASE_APP_ID=
-REACT_APP_42_CLIENT_ID=
-REACT_APP_42_CLIENT_SECRET=
-```
-
-4. Run the application:
-
-```bash
+# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
-## 📥 Deployment
+**Edit a file directly in GitHub**
 
-Push changes to GitHub and deploy automatically via:
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-* [Vercel](https://vercel.com/docs)
+**Use GitHub Codespaces**
 
-## ✅ Quality Checks
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-* Multilingual functionality tested (including Arabic RTL)
-* Responsive and consistent UI across devices
-* Secure OAuth authentication verified
-* Real-time synchronization and offline support thoroughly tested
+## What technologies are used for this project?
 
-## 📄 License
+This project is built with:
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
 
-## 📞 Contact
+## How can I deploy this project?
 
-For inquiries or contributions:
+Simply open [Lovable](https://lovable.dev/projects/df0c71cc-e4c1-4bda-a2ba-5ec641cd68bb) and click on Share -> Publish.
 
-* [Your GitHub Profile](https://github.com/your-username)
-* [Your Email](mailto:your.email@example.com)
+## Can I connect a custom domain to my Lovable project?
 
----
+Yes, you can!
 
-**Built for the 42 Abu Dhabi Community ❤️**
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)

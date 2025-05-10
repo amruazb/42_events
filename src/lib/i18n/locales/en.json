@@ -1,8 +1,7 @@
 
 {
   "app": {
-    "name": "42 Abu Dhabi Events",
-    "tagline": "Connect, Learn, & Grow Together"
+    "name": "42 Events"
   },
   "nav": {
     "home": "Home",
@@ -13,30 +12,64 @@
   },
   "languages": {
     "en": "English",
-    "ar": "العربية",
-    "fr": "Français"
-  },
-  "home": {
-    "welcome": "Welcome to 42 Abu Dhabi Events",
-    "subtitle": "Discover exciting tech events and opportunities",
-    "upcomingEvents": "Upcoming Events",
-    "viewAll": "View All Events",
-    "search": "Search events...",
-    "noEvents": "No events found"
+    "ar": "Arabic",
+    "fr": "French"
   },
   "event": {
+    "title": "Title",
     "date": "Date",
     "time": "Time",
     "location": "Location",
-    "register": "Register",
-    "details": "Event Details",
     "organizer": "Organizer",
     "attendees": "Attendees",
-    "viewMore": "View More"
+    "description": "Description",
+    "register": "Register",
+    "viewAll": "View All Events",
+    "upcoming": "Upcoming Events",
+    "searchPlaceholder": "Search events...",
+    "details": "Event Details",
+    "viewMore": "View Details",
+    "media": "Media"
   },
-  "footer": {
-    "rights": "© 2025 42 Abu Dhabi. All rights reserved.",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service"
+  "admin": {
+    "login": "Admin Login",
+    "loginDescription": "Login with your 42 Abu Dhabi credentials",
+    "loginWith42": "Login with 42 OAuth",
+    "dashboard": "Admin Dashboard",
+    "logout": "Logout",
+    "events": "Events",
+    "import": "Import",
+    "export": "Export",
+    "manageEvents": "Manage Events",
+    "createEvent": "Create New Event",
+    "editEvent": "Edit Event",
+    "deleteEvent": "Delete Event",
+    "importEvents": "Import Events",
+    "importDescription": "Upload a CSV file containing events data. The file must include columns for title, description, date, time, location in all supported languages.",
+    "upload": "Upload File",
+    "exportEvents": "Export Events",
+    "exportDescription": "Export all events data in CSV format or as a calendar file.",
+    "exportCSV": "Export as CSV",
+    "exportCalendar": "Export as Calendar",
+    "eventFormDescription": "Enter event details in all supported languages",
+    "eventMedia": "Event Media",
+    "mediaDescription": "Upload an image or video for this event. Supported formats: JPG, PNG, GIF, MP4, WEBM.",
+    "dropMediaOr": "Drop media files here or click to upload",
+    "selectFile": "Select File",
+    "changeMedia": "Change Media",
+    "csvImport": "Import from CSV",
+    "mediaImport": "Import Media Files",
+    "eventMediaGallery": "Event Media Gallery"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "actions": "Actions",
+    "submit": "Submit",
+    "required": "Required"
   }
 }
