@@ -10,31 +10,71 @@ interface TokenResponse {
 }
 
 export async function exchangeCodeForToken(code: string): Promise<TokenResponse> {
-  const response = await fetch('/api/auth', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ code }),
-  });
+  console.log('Exchanging code for token:', { hasCode: !!code });
+  
+  try {
+    const response = await fetch('/api/auth', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ code }),
+    });
 
-  if (!response.ok) {
-    throw new Error('Failed to exchange code for token');
+    console.log('Token exchange response status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Token exchange error:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      
+      let errorDetails;
+      try {
+        errorDetails = JSON.parse(errorText);
+      } catch {
+        errorDetails = errorText;
+      }
+      
+      throw new Error(errorDetails.details || 'Failed to exchange code for token');
+    }
+
+    const data = await response.json();
+    console.log('Token exchange successful');
+    return data;
+  } catch (error) {
+    console.error('Token exchange error:', error);
+    throw error;
   }
-
-  return response.json();
 }
 
 export async function getUserInfo(accessToken: string) {
-  const response = await fetch(`${FORTY_TWO_API_URL}/me`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+  console.log('Getting user info with token');
+  
+  try {
+    const response = await fetch(`${FORTY_TWO_API_URL}/me`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
 
-  if (!response.ok) {
-    throw new Error('Failed to get user info');
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Get user info error:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error('Failed to get user info');
+    }
+
+    const data = await response.json();
+    console.log('User info retrieved successfully');
+    return data;
+  } catch (error) {
+    console.error('Get user info error:', error);
+    throw error;
   }
-
-  return response.json();
 } 
