@@ -1,8 +1,9 @@
 import mongoose from "mongoose"
 
-const MONGODB_URI = process.env.MONGODB_URI || ""
+const MONGODB_URI = process.env.MONGODB_URI
 
-if (!MONGODB_URI) {
+// Only throw error in production runtime, not during build
+if (!MONGODB_URI && process.env.NODE_ENV === "production" && !process.env.VERCEL_ENV) {
   throw new Error("Please define the MONGODB_URI environment variable")
 }
 
@@ -18,6 +19,12 @@ if (!cached) {
 }
 
 async function dbConnect() {
+  // Return early if no MongoDB URI is defined (during build)
+  if (!MONGODB_URI) {
+    console.warn("MongoDB URI not defined. Database connection skipped.")
+    return null
+  }
+
   if (cached.conn) {
     return cached.conn
   }
@@ -31,8 +38,14 @@ async function dbConnect() {
       return mongoose
     })
   }
-  cached.conn = await cached.promise
-  return cached.conn
+
+  try {
+    cached.conn = await cached.promise
+    return cached.conn
+  } catch (error) {
+    console.error("Failed to connect to MongoDB:", error)
+    return null
+  }
 }
 
 export default dbConnect

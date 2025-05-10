@@ -52,33 +52,42 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, account, profile }) {
       // Initial sign in
       if (account && profile) {
-        await dbConnect()
+        const db = await dbConnect()
 
-        // Find or create user in database
-        const existingUser = await User.findOne({ fortytwoId: profile.id })
+        // If database connection is available, update user info
+        if (db) {
+          try {
+            // Find or create user in database
+            const existingUser = await User.findOne({ fortytwoId: profile.id })
 
-        if (existingUser) {
-          // Update user information
-          existingUser.accessToken = account.access_token as string
-          existingUser.refreshToken = account.refresh_token as string
-          existingUser.tokenExpiry = new Date(Date.now() + (account.expires_in as number) * 1000)
-          existingUser.lastLogin = new Date()
-          await existingUser.save()
+            if (existingUser) {
+              // Update user information
+              existingUser.accessToken = account.access_token as string
+              existingUser.refreshToken = account.refresh_token as string
+              existingUser.tokenExpiry = new Date(Date.now() + (account.expires_in as number) * 1000)
+              existingUser.lastLogin = new Date()
+              await existingUser.save()
+            } else {
+              // Create new user
+              await User.create({
+                fortytwoId: profile.id,
+                email: profile.email,
+                username: profile.login,
+                displayName: profile.displayname || profile.login,
+                avatar: profile.image.link,
+                accessToken: account.access_token,
+                refreshToken: account.refresh_token,
+                tokenExpiry: new Date(Date.now() + (account.expires_in as number) * 1000),
+                lastLogin: new Date(),
+                // Set first user as admin or use an admin list
+                isAdmin: (await User.countDocuments({})) === 0,
+              })
+            }
+          } catch (error) {
+            console.error("Error updating user in database:", error)
+          }
         } else {
-          // Create new user
-          await User.create({
-            fortytwoId: profile.id,
-            email: profile.email,
-            username: profile.login,
-            displayName: profile.displayname || profile.login,
-            avatar: profile.image.link,
-            accessToken: account.access_token,
-            refreshToken: account.refresh_token,
-            tokenExpiry: new Date(Date.now() + (account.expires_in as number) * 1000),
-            lastLogin: new Date(),
-            // Set first user as admin or use an admin list
-            isAdmin: (await User.countDocuments({})) === 0,
-          })
+          console.warn("Database connection not available. User will not be saved to database.")
         }
 
         return {

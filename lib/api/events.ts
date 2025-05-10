@@ -10,7 +10,13 @@ interface GetEventsOptions {
 // Get events with options
 export async function getEvents(options: GetEventsOptions = {}) {
   try {
-    await dbConnect()
+    const db = await dbConnect()
+
+    // If database connection failed, return empty array
+    if (!db) {
+      console.warn("Database connection not available. Returning empty events array.")
+      return []
+    }
 
     const { limit, upcoming, category } = options
 
@@ -49,7 +55,13 @@ export async function getEvents(options: GetEventsOptions = {}) {
 // Get a single event by ID
 export async function getEvent(id: string) {
   try {
-    await dbConnect()
+    const db = await dbConnect()
+
+    // If database connection failed, return null
+    if (!db) {
+      console.warn("Database connection not available. Returning null for event.")
+      return null
+    }
 
     const event = await Event.findById(id).lean()
 
