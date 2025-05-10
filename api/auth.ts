@@ -18,6 +18,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   });
 
   try {
+    console.log("code", code);
+    console.log("client_id", process.env.VITE_FORTY_TWO_CLIENT_ID);
+    console.log("client_secret", process.env.VITE_FORTY_TWO_CLIENT_SECRET);
     const tokenUrl = 'https://api.intra.42.fr/oauth/token';
     const requestBody = {
       grant_type: 'authorization_code',
@@ -25,7 +28,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       client_secret: process.env.VITE_FORTY_TWO_CLIENT_SECRET,
       code: code,
       redirect_uri: 'https://42-events-iota.vercel.app/admin',
-      scope: 'public events'
+      // scope: 'public events'
     };
 
     console.log('Making request to 42 API:', {
