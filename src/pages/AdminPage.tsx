@@ -25,7 +25,6 @@ const AdminPage = () => {
     const handleOAuthCallback = async () => {
       const code = searchParams.get("code");
       const error = searchParams.get("error");
-      console.log("code", code);
 
       if (error) {
         console.error("OAuth error:", error);
