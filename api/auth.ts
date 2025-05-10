@@ -27,15 +27,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       client_id: process.env.VITE_FORTY_TWO_CLIENT_ID,
       client_secret: process.env.VITE_FORTY_TWO_CLIENT_SECRET,
       code: code,
-      redirect_uri: 'https://42-events-iota.vercel.app/admin',
-      // scope: 'public events'
+      redirect_uri: 'https://42-events-iota.vercel.app/admin'
     };
 
     console.log('Making request to 42 API:', {
       url: tokenUrl,
       hasCode: !!code,
-      redirectUri: requestBody.redirect_uri,
-      scope: requestBody.scope
+      redirectUri: requestBody.redirect_uri
     });
 
     const response = await fetch(tokenUrl, {
