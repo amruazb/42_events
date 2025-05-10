@@ -1,26 +1,58 @@
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Calendar, Users, MapPin, ArrowRight, Clock } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import EventList from "@/components/EventList";
 import EventReview from "@/components/EventReview";
-import { useEvents } from "@/hooks/useEvents";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 
+interface Event {
+  id: string;
+  name: string;
+  description: string;
+  date: string;
+  time: string;
+  location: string;
+  image: string;
+  capacity: number;
+  registered: number;
+}
+
 const Index = () => {
   const { t } = useTranslation();
-  const { events, loading, error } = useEvents();
   const { currentLanguage } = useLanguage();
   const isRTL = currentLanguage === 'ar';
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch('/api/events');
+        if (!response.ok) {
+          throw new Error('Failed to fetch events');
+        }
+        const data = await response.json();
+        setEvents(data);
+      } catch (err) {
+        setError('Failed to load events');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   // Get the most recent event for review
-  const recentEvent = events?.[0];
+  const recentEvent = events[0];
   // Get 3 featured events
-  const featuredEvents = events?.slice(0, 3) || [];
+  const featuredEvents = events.slice(0, 3);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -117,44 +149,54 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredEvents.map((event) => (
-                <Card key={event.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="aspect-video relative">
-                    <img 
-                      src={event.image || '/placeholder-event.jpg'} 
-                      alt={event.name}
-                      className="object-cover w-full h-full"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-semibold mb-2">{event.name}</h3>
-                    <div className="space-y-2 text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        <span>{new Date(event.date).toLocaleDateString()}</span>
+            {loading ? (
+              <div className="flex justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            ) : error ? (
+              <div className="text-center text-red-500">
+                {error}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {featuredEvents.map((event) => (
+                  <Card key={event.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                    <div className="aspect-video relative">
+                      <img 
+                        src={event.image || '/placeholder-event.jpg'} 
+                        alt={event.name}
+                        className="object-cover w-full h-full"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-semibold mb-2">{event.name}</h3>
+                      <div className="space-y-2 text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4" />
+                          <span>{new Date(event.date).toLocaleDateString()}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4" />
+                          <span>{event.time}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4" />
+                          <span>{event.location}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4" />
-                        <span>{event.time}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
-                        <span>{event.location}</span>
+                      <div className="mt-4">
+                        <Button asChild className="w-full">
+                          <Link to={`/events/${event.id}`}>
+                            View Details
+                          </Link>
+                        </Button>
                       </div>
                     </div>
-                    <div className="mt-4">
-                      <Button asChild className="w-full">
-                        <Link to={`/events/${event.id}`}>
-                          View Details
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
+                  </Card>
+                ))}
+              </div>
+            )}
             
             <div className="mt-12 text-center">
               <Button 
