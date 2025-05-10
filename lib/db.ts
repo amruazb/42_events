@@ -32,20 +32,42 @@ async function dbConnect() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      ssl: true,
+      sslValidate: true,
+      retryWrites: true,
+      retryReads: true,
     }
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
+      console.log("MongoDB connected successfully")
       return mongoose
     })
   }
 
   try {
     cached.conn = await cached.promise
-    return cached.conn
-  } catch (error) {
-    console.error("Failed to connect to MongoDB:", error)
-    return null
+  } catch (e) {
+    cached.promise = null
+    console.error("MongoDB connection error:", e)
+    throw e
   }
+
+  return cached.conn
 }
+
+// Handle connection errors
+mongoose.connection.on("error", (error) => {
+  console.error("MongoDB connection error:", error)
+  cached.promise = null
+  cached.conn = null
+})
+
+mongoose.connection.on("disconnected", () => {
+  console.warn("MongoDB disconnected")
+  cached.promise = null
+  cached.conn = null
+})
 
 export default dbConnect

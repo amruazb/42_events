@@ -80,28 +80,29 @@ export function EventList({ initialEvents = [] }: { initialEvents?: Event[] }) {
     }
 
     // Filter events based on search query, tab, and category filter
-    let filtered = events
+    let filtered = [...events] // Create a new array to avoid mutating the original
 
     // Filter by tab (upcoming or past)
     const now = new Date()
     if (activeTab === "upcoming") {
-      filtered = filtered.filter((event) => new Date(event.startDate) >= now)
+      filtered = filtered.filter((event) => event && new Date(event.startDate) >= now)
     } else {
-      filtered = filtered.filter((event) => new Date(event.startDate) < now)
+      filtered = filtered.filter((event) => event && new Date(event.startDate) < now)
     }
 
     // Filter by category
     if (activeFilter !== "all") {
-      filtered = filtered.filter((event) => event.category.toLowerCase() === activeFilter.toLowerCase())
+      filtered = filtered.filter((event) => event && event.category?.toLowerCase() === activeFilter.toLowerCase())
     }
 
     // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter(
         (event) =>
-          event.title[language].toLowerCase().includes(searchQuery.toLowerCase()) ||
-          event.description[language].toLowerCase().includes(searchQuery.toLowerCase()) ||
-          event.location[language].toLowerCase().includes(searchQuery.toLowerCase()),
+          event &&
+          event.title?.[language]?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          event.description?.[language]?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          event.location?.[language]?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     }
 

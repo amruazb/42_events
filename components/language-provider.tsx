@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { createContext, useContext, useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 
 type Language = "en" | "ar" | "fr"
 type Direction = "ltr" | "rtl"
@@ -327,55 +327,47 @@ const translations = {
   },
 }
 
-const LanguageContext = createContext<LanguageContextType>({
-  language: "en",
-  direction: "ltr",
-  setLanguage: () => {},
-  t: (key: string) => key,
-})
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
-export function useLanguage() {
-  return useContext(LanguageContext)
-}
-
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("en")
-  const [direction, setDirection] = useState<Direction>("ltr")
+export function LanguageProvider({
+  children,
+  defaultLanguage = "en",
+}: {
+  children: React.ReactNode
+  defaultLanguage?: Language
+}) {
+  const [language, setLanguage] = useState<Language>(defaultLanguage)
   const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
-    // Get language from localStorage or browser preference
-    const savedLanguage = localStorage.getItem("language") as Language
-    if (savedLanguage && ["en", "ar", "fr"].includes(savedLanguage)) {
-      setLanguageState(savedLanguage)
-    } else {
-      const browserLanguage = navigator.language.split("-")[0]
-      if (["en", "ar", "fr"].includes(browserLanguage)) {
-        setLanguageState(browserLanguage as Language)
-      }
+    const lang = pathname.split("/")[1] as Language
+    if (lang && ["en", "ar", "fr"].includes(lang)) {
+      setLanguage(lang)
     }
-  }, [])
+  }, [pathname])
 
-  useEffect(() => {
-    // Update direction based on language
-    setDirection(language === "ar" ? "rtl" : "ltr")
-
-    // Update HTML dir attribute
-    document.documentElement.dir = language === "ar" ? "rtl" : "ltr"
-
-    // Save language preference
-    localStorage.setItem("language", language)
-  }, [language])
-
-  const setLanguage = (lang: Language) => {
-    setLanguageState(lang)
-    // Refresh the page to apply language change
-    router.refresh()
+  const handleLanguageChange = (newLang: Language) => {
+    setLanguage(newLang)
+    const newPath = pathname.replace(/^\/[a-z]{2}/, `/${newLang}`)
+    router.push(newPath)
   }
 
   const t = (key: string): string => {
     return translations[language][key as keyof (typeof translations)[typeof language]] || key
   }
 
-  return <LanguageContext.Provider value={{ language, direction, setLanguage, t }}>{children}</LanguageContext.Provider>
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage: handleLanguageChange, t }}>
+      {children}
+    </LanguageContext.Provider>
+  )
+}
+
+export function useLanguage() {
+  const context = useContext(LanguageContext)
+  if (context === undefined) {
+    throw new Error("useLanguage must be used within a LanguageProvider")
+  }
+  return context
 }
