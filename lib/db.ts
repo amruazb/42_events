@@ -32,13 +32,18 @@ async function dbConnect() {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
       ssl: true,
-      sslValidate: true,
+      tls: true,
+      tlsAllowInvalidCertificates: true,
+      tlsAllowInvalidHostnames: true,
       retryWrites: true,
       retryReads: true,
+      maxPoolSize: 10,
+      minPoolSize: 5,
+      connectTimeoutMS: 10000,
     }
 
     try {
-      cached.promise = mongoose.connect(MONGODB_URI, opts)
+      cached.promise = mongoose.connect(MONGODB_URI as string, opts)
       console.log("MongoDB connected successfully")
     } catch (error) {
       cached.promise = null

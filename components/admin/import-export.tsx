@@ -1,224 +1,293 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Upload, Download, FileText, Calendar } from "lucide-react"
+import { useLanguage } from "@/components/language-provider"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Download, Upload, RefreshCw, FileText } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useToast } from "@/components/ui/use-toast"
-import { useLanguage } from "@/components/language-provider"
-import { Import42Events } from "@/components/admin/import-42-events"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export function AdminImportExport() {
-  const router = useRouter()
-  const { toast } = useToast()
   const { t } = useLanguage()
-
-  const [csvFile, setCsvFile] = useState<File | null>(null)
   const [isImporting, setIsImporting] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [csvFile, setCsvFile] = useState<File | null>(null)
+  const [mediaFiles, setMediaFiles] = useState<{ [key: string]: File }>({})
+  const [error, setError] = useState<string | null>(null)
 
   // Handle CSV file selection
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCsvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setCsvFile(e.target.files[0])
+      setError(null)
     }
   }
 
-  // Import events from CSV
-  const handleImport = async () => {
-    if (!csvFile) {
-      toast({
-        title: t("error"),
-        description: t("please_select_file"),
-        variant: "destructive",
+  // Handle media file selection
+  const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newMediaFiles = { ...mediaFiles }
+      Array.from(e.target.files).forEach((file) => {
+        newMediaFiles[file.name] = file
       })
+      setMediaFiles(newMediaFiles)
+      setError(null)
+    }
+  }
+
+  // Handle import from 42 API
+  const handleImport = async () => {
+    setIsImporting(true)
+    setError(null)
+    try {
+      const response = await fetch("/api/42/import", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to import events")
+      }
+
+      // Refresh the page to show updated events
+      window.location.reload()
+    } catch (error) {
+      console.error("Error importing events:", error)
+      setError(t("error_importing_events"))
+    } finally {
+      setIsImporting(false)
+    }
+  }
+
+  // Handle CSV import
+  const handleCsvImport = async () => {
+    if (!csvFile) {
+      setError(t("please_select_csv_file"))
       return
     }
 
     setIsImporting(true)
-
+    setError(null)
     try {
       const formData = new FormData()
-      formData.append("file", csvFile)
+      formData.append("csv", csvFile)
+      
+      // Append media files
+      Object.entries(mediaFiles).forEach(([filename, file]) => {
+        formData.append("media", file)
+      })
 
       const response = await fetch("/api/events/import", {
         method: "POST",
         body: formData,
       })
 
-      if (response.ok) {
-        const result = await response.json()
-        toast({
-          title: t("events_imported"),
-          description: `${result.imported} ${t("events_imported_count")}`,
-        })
-
-        // Reset file input
-        setCsvFile(null)
-
-        // Refresh the page
-        router.refresh()
-      } else {
-        const error = await response.json()
-        throw new Error(error.message || "Import failed")
+      if (!response.ok) {
+        throw new Error("Failed to import events from CSV")
       }
+
+      // Clear files
+      setCsvFile(null)
+      setMediaFiles({})
+      
+      // Refresh the page to show updated events
+      window.location.reload()
     } catch (error) {
       console.error("Error importing events:", error)
-      toast({
-        title: t("error"),
-        description: t("error_importing_events"),
-        variant: "destructive",
-      })
+      setError(t("error_importing_events"))
     } finally {
       setIsImporting(false)
     }
   }
 
-  // Export events to CSV
-  const handleExportCSV = async () => {
+  // Handle export to JSON
+  const handleExport = async () => {
     setIsExporting(true)
-
     try {
-      const response = await fetch("/api/events/export?format=csv", {
-        method: "GET",
-      })
-
-      if (response.ok) {
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = url
-        a.download = `42-events-${new Date().toISOString().split("T")[0]}.csv`
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-        a.remove()
-
-        toast({
-          title: t("events_exported"),
-          description: t("events_exported_csv"),
-        })
-      } else {
-        throw new Error("Export failed")
+      const response = await fetch("/api/events")
+      if (!response.ok) {
+        throw new Error("Failed to fetch events")
       }
+
+      const events = await response.json()
+      const blob = new Blob([JSON.stringify(events, null, 2)], { type: "application/json" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = "42-events.json"
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
     } catch (error) {
       console.error("Error exporting events:", error)
-      toast({
-        title: t("error"),
-        description: t("error_exporting_events"),
-        variant: "destructive",
-      })
+      setError(t("error_exporting_events"))
     } finally {
       setIsExporting(false)
     }
   }
 
-  // Export events to ICS
-  const handleExportICS = async () => {
-    setIsExporting(true)
-
+  // Handle refresh from 42 API
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    setError(null)
     try {
-      const response = await fetch("/api/events/export?format=ics", {
-        method: "GET",
+      const response = await fetch("/api/42/refresh", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
       })
 
-      if (response.ok) {
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = url
-        a.download = `42-events-${new Date().toISOString().split("T")[0]}.ics`
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-        a.remove()
-
-        toast({
-          title: t("events_exported"),
-          description: t("events_exported_ics"),
-        })
-      } else {
-        throw new Error("Export failed")
+      if (!response.ok) {
+        throw new Error("Failed to refresh events")
       }
+
+      // Refresh the page to show updated events
+      window.location.reload()
     } catch (error) {
-      console.error("Error exporting events:", error)
-      toast({
-        title: t("error"),
-        description: t("error_exporting_events"),
-        variant: "destructive",
-      })
+      console.error("Error refreshing events:", error)
+      setError(t("error_refreshing_events"))
     } finally {
-      setIsExporting(false)
+      setIsRefreshing(false)
     }
   }
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="import">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="import">{t("import_csv")}</TabsTrigger>
-          <TabsTrigger value="import42">{t("import_42")}</TabsTrigger>
-          <TabsTrigger value="export">{t("export_events")}</TabsTrigger>
+      <Tabs defaultValue="import" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3 bg-[#242424] p-1">
+          <TabsTrigger value="import" className="data-[state=active]:bg-[#1A1A1A]">
+            {t("import")}
+          </TabsTrigger>
+          <TabsTrigger value="export" className="data-[state=active]:bg-[#1A1A1A]">
+            {t("export")}
+          </TabsTrigger>
+          <TabsTrigger value="refresh" className="data-[state=active]:bg-[#1A1A1A]">
+            {t("refresh")}
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="import" className="space-y-6 pt-6">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="csv-file">{t("select_csv_file")}</Label>
-              <Input id="csv-file" type="file" accept=".csv" onChange={handleFileChange} />
-            </div>
+        <TabsContent value="import" className="space-y-6">
+          <Card className="bg-[#242424] border-gray-800">
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold text-white">{t("import_from_csv")}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="csv-file" className="text-white">{t("select_csv_file")}</Label>
+                <Input
+                  id="csv-file"
+                  type="file"
+                  accept=".csv"
+                  onChange={handleCsvChange}
+                  className="bg-[#1A1A1A] border-gray-700 text-white"
+                />
+              </div>
 
-            <div className="text-sm text-muted-foreground">
-              <p className="mb-2">{t("csv_format")}:</p>
-              <pre className="bg-muted p-3 rounded-md overflow-x-auto">
-                title_en,title_ar,title_fr,description_en,description_ar,description_fr,location_en,location_ar,location_fr,startDate,endDate,category,image,capacity
-              </pre>
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="media-files" className="text-white">{t("select_media_files")}</Label>
+                <Input
+                  id="media-files"
+                  type="file"
+                  accept="image/*,video/*"
+                  multiple
+                  onChange={handleMediaChange}
+                  className="bg-[#1A1A1A] border-gray-700 text-white"
+                />
+                {Object.keys(mediaFiles).length > 0 && (
+                  <p className="text-sm text-gray-400">
+                    {t("selected_files")}: {Object.keys(mediaFiles).join(", ")}
+                  </p>
+                )}
+              </div>
 
-            <Button onClick={handleImport} disabled={!csvFile || isImporting} className="w-full">
-              {isImporting ? t("importing") : t("import")}
-              <Upload className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
+              <div className="text-sm text-gray-400">
+                <p className="mb-2">{t("csv_format")}:</p>
+                <pre className="bg-[#1A1A1A] p-3 rounded-md overflow-x-auto border border-gray-700">
+                  title_en,title_ar,title_fr,description_en,description_ar,description_fr,location_en,location_ar,location_fr,startDate,endDate,category,image,capacity
+                </pre>
+              </div>
+
+              <Button
+                onClick={handleCsvImport}
+                disabled={!csvFile || isImporting}
+                className="w-full bg-[#1A1A1A] text-white hover:bg-gray-800 border border-gray-700"
+              >
+                <FileText className={`h-4 w-4 mr-2 ${isImporting ? "animate-spin" : ""}`} />
+                {isImporting ? t("importing") : t("import_csv")}
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-[#242424] border-gray-800">
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold text-white">{t("import_from_42")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-400 mb-4">{t("import_description")}</p>
+              <Button
+                onClick={handleImport}
+                disabled={isImporting}
+                className="w-full bg-[#1A1A1A] text-white hover:bg-gray-800 border border-gray-700"
+              >
+                <Upload className={`h-4 w-4 mr-2 ${isImporting ? "animate-spin" : ""}`} />
+                {isImporting ? t("importing") : t("import_from_42")}
+              </Button>
+            </CardContent>
+          </Card>
         </TabsContent>
 
-        <TabsContent value="import42" className="space-y-6 pt-6">
-          <Import42Events />
+        <TabsContent value="export">
+          <Card className="bg-[#242424] border-gray-800">
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold text-white">{t("export_events")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-400 mb-4">{t("export_description")}</p>
+              <Button
+                onClick={handleExport}
+                disabled={isExporting}
+                className="w-full bg-[#1A1A1A] text-white hover:bg-gray-800 border border-gray-700"
+              >
+                <Download className={`h-4 w-4 mr-2 ${isExporting ? "animate-spin" : ""}`} />
+                {isExporting ? t("exporting") : t("export_to_json")}
+              </Button>
+            </CardContent>
+          </Card>
         </TabsContent>
 
-        <TabsContent value="export" className="space-y-6 pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-card rounded-lg p-6 space-y-4">
-              <div className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold">{t("export_csv")}</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">{t("export_csv_description")}</p>
-              <Button onClick={handleExportCSV} disabled={isExporting} className="w-full">
-                {isExporting ? t("exporting") : t("export_csv")}
-                <Download className="ml-2 h-4 w-4" />
+        <TabsContent value="refresh">
+          <Card className="bg-[#242424] border-gray-800">
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold text-white">{t("refresh_events")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-400 mb-4">{t("refresh_description")}</p>
+              <Button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="w-full bg-[#1A1A1A] text-white hover:bg-gray-800 border border-gray-700"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
+                {isRefreshing ? t("refreshing") : t("refresh_from_42")}
               </Button>
-            </div>
-
-            <div className="bg-card rounded-lg p-6 space-y-4">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold">{t("export_ics")}</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">{t("export_ics_description")}</p>
-              <Button onClick={handleExportICS} disabled={isExporting} className="w-full">
-                {isExporting ? t("exporting") : t("export_ics")}
-                <Download className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
+
+      {error && (
+        <Alert variant="destructive" className="bg-red-900/20 border-red-800">
+          <AlertDescription className="text-red-400">{error}</AlertDescription>
+        </Alert>
+      )}
     </div>
   )
 }
