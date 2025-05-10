@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { LanguageProvider } from "@/components/language-provider"
 import { SocketProvider } from "@/components/socket-provider"
 import { SessionProvider } from "@/components/session-provider"
+import { headers } from "next/headers"
 
 import "./globals.css"
 
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
   title: "42 Abu Dhabi Events",
   description: "Event Management Web App for the 42 Abu Dhabi community",
   manifest: "/manifest.json",
-    generator: 'v0.dev'
+  generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -23,8 +24,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  // Get the locale from the URL path
+  const headersList = headers()
+  const pathname = headersList.get("x-pathname") || ""
+  const locale = pathname.split("/")[1] || "en"
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <SessionProvider>

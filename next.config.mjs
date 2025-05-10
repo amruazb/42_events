@@ -20,6 +20,8 @@ const nextConfig = {
   },
   // Ensure output directory is .next
   distDir: '.next',
+  // Add trailing slash to ensure proper routing
+  trailingSlash: true,
 };
 
 export default nextConfig;
