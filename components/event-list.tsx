@@ -39,25 +39,33 @@ export function EventList({ initialEvents = [] }: { initialEvents?: Event[] }) {
   const { t, language } = useLanguage()
   const searchParams = useSearchParams()
 
-  const [events, setEvents] = useState<Event[]>(initialEvents)
-  const [filteredEvents, setFilteredEvents] = useState<Event[]>(initialEvents)
+  const [events, setEvents] = useState<Event[]>(Array.isArray(initialEvents) ? initialEvents : [])
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>(Array.isArray(initialEvents) ? initialEvents : [])
   const [searchQuery, setSearchQuery] = useState("")
-  const [isLoading, setIsLoading] = useState(initialEvents.length === 0)
+  const [isLoading, setIsLoading] = useState(!Array.isArray(initialEvents) || initialEvents.length === 0)
   const [activeTab, setActiveTab] = useState("upcoming")
   const [activeFilter, setActiveFilter] = useState("all")
 
   // Fetch events if not provided
   useEffect(() => {
     const fetchEvents = async () => {
-      if (initialEvents.length === 0) {
+      if (!Array.isArray(initialEvents) || initialEvents.length === 0) {
         setIsLoading(true)
         try {
           const response = await fetch("/api/events")
           const data = await response.json()
-          setEvents(data)
-          setFilteredEvents(data)
+          if (Array.isArray(data)) {
+            setEvents(data)
+            setFilteredEvents(data)
+          } else {
+            console.error("Invalid events data received:", data)
+            setEvents([])
+            setFilteredEvents([])
+          }
         } catch (error) {
           console.error("Error fetching events:", error)
+          setEvents([])
+          setFilteredEvents([])
         } finally {
           setIsLoading(false)
         }
@@ -80,7 +88,7 @@ export function EventList({ initialEvents = [] }: { initialEvents?: Event[] }) {
     }
 
     // Filter events based on search query, tab, and category filter
-    let filtered = [...events] // Create a new array to avoid mutating the original
+    let filtered = Array.isArray(events) ? [...events] : []
 
     // Filter by tab (upcoming or past)
     const now = new Date()

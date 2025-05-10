@@ -3,7 +3,8 @@ import { Inter } from "next/font/google"
 import { LanguageProvider } from "@/components/language-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { cn } from "@/lib/utils"
-import "./globals.css"
+import { SessionProvider } from "@/components/session-provider"
+import "../globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -13,6 +14,8 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
 }
 
+type Language = "en" | "ar" | "fr"
+
 export default async function LocaleLayout({
   children,
   params,
@@ -20,15 +23,17 @@ export default async function LocaleLayout({
   children: React.ReactNode
   params: { lang: string }
 }) {
-  const lang = await Promise.resolve(params.lang)
+  const lang = (await Promise.resolve(params.lang)) as Language
 
   return (
     <html lang={lang} suppressHydrationWarning>
       <body className={cn(inter.className, "min-h-screen bg-background antialiased")}>
-        <LanguageProvider defaultLanguage={lang}>
-          {children}
-          <Toaster />
-        </LanguageProvider>
+        <SessionProvider>
+          <LanguageProvider defaultLanguage={lang}>
+            {children}
+            <Toaster />
+          </LanguageProvider>
+        </SessionProvider>
       </body>
     </html>
   )
