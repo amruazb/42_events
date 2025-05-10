@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 
 const FORTY_TWO_AUTH_URL = "https://api.intra.42.fr/oauth/authorize";
 const CLIENT_ID = "u-s4t2ud-90a7fe45a22821871b6f758cd2b2f0f7054566460b5702187d52588be1c4a0c7";
-const REDIRECT_URI = "http://localhost/8080/admin";
+const REDIRECT_URI = "https://42-events-iota.vercel.app/admin";
 
 interface AdminLoginProps {
   onLogin: (e: React.FormEvent) => void;
