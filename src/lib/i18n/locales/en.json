@@ -59,7 +59,26 @@
     "changeMedia": "Change Media",
     "csvImport": "Import from CSV",
     "mediaImport": "Import Media Files",
-    "eventMediaGallery": "Event Media Gallery"
+    "eventMediaGallery": "Event Media Gallery",
+    "csvFormat": {
+      "title": "CSV Format Guide",
+      "description": "Please ensure your CSV file follows the format below. The first row should contain column headers exactly as shown below.",
+      "columnName": "Column Name",
+      "description": "Description",
+      "example": "Example",
+      "downloadTemplate": "Download Template",
+      "titleEn": "Event title in English",
+      "titleAr": "Event title in Arabic",
+      "titleFr": "Event title in French",
+      "descriptionEn": "Event description in English",
+      "descriptionAr": "Event description in Arabic",
+      "descriptionFr": "Event description in French",
+      "date": "Event date in YYYY-MM-DD format",
+      "time": "Event time in HH:MM-HH:MM format",
+      "location": "Event location or venue",
+      "organizer": "Event organizer's name",
+      "note": "Note: Make sure all required fields are filled. The CSV must be UTF-8 encoded to support Arabic characters properly."
+    }
   },
   "common": {
     "loading": "Loading...",
