@@ -5,7 +5,6 @@ import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Star, MessageSquare, ThumbsUp, Users, Clock, MapPin } from "lucide-react";
 
@@ -56,7 +55,6 @@ interface EventReviewProps {
 
 const EventReview = ({ eventId, eventName }: EventReviewProps) => {
   const { t } = useTranslation();
-  const { user } = useAuth();
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -86,8 +84,7 @@ const EventReview = ({ eventId, eventName }: EventReviewProps) => {
           eventName,
           answers,
           comment,
-          userId: user?.id || null,
-          isAnonymous: !user?.id
+          isAnonymous: true // Always anonymous for now
         }),
       });
 
@@ -162,7 +159,7 @@ const EventReview = ({ eventId, eventName }: EventReviewProps) => {
             {isSubmitting ? "Submitting..." : "Submit Review"}
           </Button>
           <p className="text-sm text-muted-foreground text-center">
-            {user ? "Review will be submitted with your account" : "Review will be submitted anonymously"}
+            Your review will be submitted anonymously
           </p>
         </div>
       </div>

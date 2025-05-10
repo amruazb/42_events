@@ -10,7 +10,7 @@ export default async function handler(
   }
 
   try {
-    const { eventId, eventName, answers, comment, userId, isAnonymous } = req.body;
+    const { eventId, eventName, answers, comment } = req.body;
 
     // Validate required fields
     if (!eventId || !eventName || !answers) {
@@ -26,8 +26,7 @@ export default async function handler(
           ...answers,
           comment: comment || null
         },
-        userId: userId || null,
-        isAnonymous: isAnonymous || false,
+        isAnonymous: true,
         createdAt: new Date(),
       },
     });
