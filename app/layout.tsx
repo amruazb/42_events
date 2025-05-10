@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/components/theme-provider"
 import { LanguageProvider } from "@/components/language-provider"
 import { SocketProvider } from "@/components/socket-provider"
+import { SessionProvider } from "@/components/session-provider"
 
 import "./globals.css"
 
@@ -26,12 +27,14 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <LanguageProvider>
-            <SocketProvider>
-              {children}
-              <Toaster />
-            </SocketProvider>
-          </LanguageProvider>
+          <SessionProvider>
+            <LanguageProvider>
+              <SocketProvider>
+                {children}
+                <Toaster />
+              </SocketProvider>
+            </LanguageProvider>
+          </SessionProvider>
         </ThemeProvider>
       </body>
     </html>
