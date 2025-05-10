@@ -30,7 +30,7 @@ const AdminPage = () => {
         console.error("OAuth error:", error);
         toast({
           title: "Authentication failed",
-          description: "There was an error during authentication.",
+          description: `Error from 42 OAuth: ${error}`,
           variant: "destructive",
         });
         return;
@@ -57,9 +57,17 @@ const AdminPage = () => {
         });
       } catch (error) {
         console.error("Error during authentication:", error);
+        let errorMessage = "There was an error during authentication.";
+        
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === 'object' && error !== null && 'details' in error) {
+          errorMessage = (error as { details: string }).details;
+        }
+
         toast({
           title: "Authentication failed",
-          description: "There was an error during authentication.",
+          description: errorMessage,
           variant: "destructive",
         });
       }
