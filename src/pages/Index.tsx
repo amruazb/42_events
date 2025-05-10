@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { Calendar, Users, MapPin, ArrowRight } from "lucide-react";
+import { Calendar, Users, MapPin, ArrowRight, Clock } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import EventList from "@/components/EventList";
@@ -9,6 +9,7 @@ import { useEvents } from "@/hooks/useEvents";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import { Card } from "@/components/ui/card";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -18,6 +19,8 @@ const Index = () => {
 
   // Get the most recent event for review
   const recentEvent = events?.[0];
+  // Get 3 featured events
+  const featuredEvents = events?.slice(0, 3) || [];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -108,17 +111,50 @@ const Index = () => {
         <section className="py-20 bg-muted/50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">{t('home.upcomingEvents')}</h2>
+              <h2 className="text-3xl font-bold mb-4">Featured Events</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
                 Discover and join the most exciting events happening in our community
               </p>
             </div>
             
-            <EventList 
-              events={events} 
-              limit={3} 
-              showSearch={false} 
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredEvents.map((event) => (
+                <Card key={event.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="aspect-video relative">
+                    <img 
+                      src={event.image || '/placeholder-event.jpg'} 
+                      alt={event.name}
+                      className="object-cover w-full h-full"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-semibold mb-2">{event.name}</h3>
+                    <div className="space-y-2 text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        <span>{new Date(event.date).toLocaleDateString()}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4" />
+                        <span>{event.time}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        <span>{event.location}</span>
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <Button asChild className="w-full">
+                        <Link to={`/events/${event.id}`}>
+                          View Details
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
             
             <div className="mt-12 text-center">
               <Button 
