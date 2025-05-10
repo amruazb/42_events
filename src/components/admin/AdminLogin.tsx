@@ -11,9 +11,11 @@ const AdminLogin = ({ onLogin }: { onLogin: () => void }) => {
   const handleLogin = () => {
     const CLIENT_ID = import.meta.env.VITE_FORTY_TWO_CLIENT_ID;
     const REDIRECT_URI = "https://42-events-iota.vercel.app/admin";
-    const SCOPES = "public events";
+    // The 'public' scope is the default scope that doesn't need to be specified
+    // We only need to specify additional scopes if we need them
+    const SCOPES = "";
     
-    const authUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${encodeURIComponent(SCOPES)}`;
+    const authUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code${SCOPES ? `&scope=${encodeURIComponent(SCOPES)}` : ''}`;
     window.location.href = authUrl;
   };
 
