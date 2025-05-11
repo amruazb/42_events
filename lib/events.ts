@@ -1,3 +1,6 @@
+import { db } from "@/lib/db"
+
+import { getAccessToken } from "@/lib/auth"
 async function fetchEventDetails(id: string) {
   const accessToken = await getAccessToken();
 

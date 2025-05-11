@@ -3,6 +3,8 @@ import type { JWT } from "next-auth/jwt"
 import FortyTwoProvider from "next-auth/providers/42-school"
 import dbConnect from "@/lib/db"
 import User from "@/lib/models/user"
+import { db } from "@/lib/db"
+
 
 // Function to refresh the 42 API token
 async function refreshAccessToken(token: JWT) {
