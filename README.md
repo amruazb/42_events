@@ -1,4 +1,4 @@
-# Events Management Application
+# Events Management Application 
 
 A comprehensive full-stack application for managing events with real-time updates, offline support, and a secure admin dashboard. Built with Next.js, MongoDB, and modern web technologies.
 
