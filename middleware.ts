@@ -1,68 +1,59 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { jwtVerify } from "jose"
 
-// List of supported locales
-const locales = ["en", "ar", "fr"]
-
-// Get the preferred locale from request
-function getLocale(request: NextRequest) {
-  // Check if there's a cookie with a preferred locale
-  const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value
-  if (cookieLocale && locales.includes(cookieLocale)) {
-    return cookieLocale
+// Move JWT verification to middleware without importing MongoDB
+async function verifyToken(token: string) {
+  try {
+    const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(JWT_SECRET))
+    return payload
+  } catch (error) {
+    return null
   }
-
-  // Check for locale in pathname
-  const pathname = request.nextUrl.pathname
-  const pathnameLocale = locales.find((locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`)
-  if (pathnameLocale) return pathnameLocale
-
-  // Check for Accept-Language header
-  const acceptLanguage = request.headers.get("accept-language")
-  if (acceptLanguage) {
-    const headerLocale = acceptLanguage
-      .split(",")
-      .map((lang) => lang.split(";")[0].trim().split("-")[0])
-      .find((lang) => locales.includes(lang))
-
-    if (headerLocale) return headerLocale
-  }
-
-  // Default to English
-  return "en"
 }
 
-export function middleware(request: NextRequest) {
-  // Get the locale from the request
-  const locale = getLocale(request)
+export async function middleware(request: NextRequest) {
+  // Check if the request is for the admin area
+  if (request.nextUrl.pathname.startsWith("/admin")) {
+    // Get the token from cookies
+    const token = request.cookies.get("auth-token")?.value
 
-  // Get the pathname without the locale
-  const pathname = request.nextUrl.pathname
+    // If there's no token, we'll still allow access to the admin page
+    // The page itself will handle showing the login form
+    if (!token) {
+      return NextResponse.next()
+    }
 
-  // Check if the pathname already has a locale
-  const pathnameHasLocale = locales.some((locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`)
+    // If there is a token, verify it
+    const payload = await verifyToken(token)
 
-  // If the pathname doesn't have a locale, redirect to the pathname with the locale
-  if (!pathnameHasLocale) {
-    // Create a new URL with the locale
-    const newUrl = new URL(`/${locale}${pathname}`, request.url)
+    if (!payload || payload.role !== "admin") {
+      // Invalid token or not an admin, redirect to home page
+      return NextResponse.redirect(new URL("/", request.url))
+    }
+  }
 
-    // Copy the search params
-    newUrl.search = request.nextUrl.search
+  // For API routes that need protection
+  if (request.nextUrl.pathname.startsWith("/api/admin")) {
+    // Get the token from the Authorization header
+    const authHeader = request.headers.get("authorization")
 
-    // Return a redirect response
-    return NextResponse.redirect(newUrl)
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const token = authHeader.split(" ")[1]
+    const payload = await verifyToken(token)
+
+    if (!payload || payload.role !== "admin") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
   }
 
   return NextResponse.next()
 }
 
 export const config = {
-  // Match all request paths except for the ones starting with:
-  // - api (API routes)
-  // - _next/static (static files)
-  // - _next/image (image optimization files)
-  // - favicon.ico (favicon file)
-  // - public folder
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|public).*)"],
+  matcher: ["/admin/:path*", "/api/admin/:path*"],
 }

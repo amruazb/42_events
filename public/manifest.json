@@ -1,23 +1,21 @@
 {
-  "name": "42 Abu Dhabi Events",
-  "short_name": "42 Events",
-  "description": "Event Management Web App for the 42 Abu Dhabi community",
+  "name": "Events Management App",
+  "short_name": "Events App",
+  "description": "A comprehensive events management application",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#121212",
-  "theme_color": "#00BABC",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
   "icons": [
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
