@@ -1,4 +1,4 @@
-# Events Management Application
+# Events Management Application 
 
 A comprehensive events management application with real-time features, admin dashboard, and MongoDB integration.
 
