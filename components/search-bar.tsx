@@ -36,7 +36,7 @@ export default function SearchBar() {
           <Input
             type="text"
             placeholder="Search events by title, description, or location..."
-            className="pl-10 pr-10"
+            className="pl-10 pr-10 border-primary focus-visible:ring-primary"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -50,7 +50,7 @@ export default function SearchBar() {
             </button>
           )}
         </div>
-        <Button type="submit" className="ml-2">
+        <Button type="submit" className="ml-2 bg-primary hover:bg-primary/90">
           Search
         </Button>
       </div>

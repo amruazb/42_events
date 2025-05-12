@@ -2,14 +2,10 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Calendar, Clock, MapPin } from "lucide-react"
-import { formatDate } from "@/lib/utils"
 import { useSearchParams } from "next/navigation"
 import type { Event } from "@/lib/types"
 import { useBroadcastChannel } from "@/hooks/use-broadcast-channel"
+import { EventCard } from "@/components/event-card"
 
 export default function EventsList() {
   const [events, setEvents] = useState<Event[]>([])
@@ -67,20 +63,9 @@ export default function EventsList() {
 
   if (loading) {
     return (
-      <div className="grid gap-4">
+      <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <Card key={i} className="overflow-hidden">
-            <CardContent className="p-0">
-              <div className="flex animate-pulse flex-col gap-2 p-4 sm:flex-row sm:items-center">
-                <div className="h-16 w-16 rounded-md bg-muted"></div>
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 w-3/4 rounded bg-muted"></div>
-                  <div className="h-3 w-1/2 rounded bg-muted"></div>
-                </div>
-                <div className="h-8 w-24 rounded bg-muted"></div>
-              </div>
-            </CardContent>
-          </Card>
+          <div key={i} className="h-32 animate-pulse rounded-md bg-muted"></div>
         ))}
       </div>
     )
@@ -97,53 +82,22 @@ export default function EventsList() {
     )
   }
 
+  // Function to determine event type based on tags
+  const getEventType = (event: Event): "meetup" | "hackathon" | "piscine" => {
+    if (event.tags?.some((tag) => tag.toLowerCase().includes("hackathon"))) {
+      return "hackathon"
+    } else if (event.tags?.some((tag) => tag.toLowerCase().includes("piscine"))) {
+      return "piscine"
+    }
+    return "meetup"
+  }
+
   return (
-    <div className="grid gap-4">
+    <div className="space-y-4">
       {events.map((event) => (
-        <Card key={event._id} className="overflow-hidden">
-          <CardContent className="p-0">
-            <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
-              <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-                <Calendar className="h-8 w-8" />
-              </div>
-
-              <div className="flex-1 space-y-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-semibold">{event.title}</h3>
-                  {event.featured && <Badge>Featured</Badge>}
-                  {event.tags?.map((tag) => (
-                    <Badge key={tag} variant="outline" className="capitalize">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-
-                <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                  <div className="flex items-center">
-                    <Calendar className="mr-1 h-3 w-3" />
-                    <span>{formatDate(event.date)}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Clock className="mr-1 h-3 w-3" />
-                    <span>{new Date(event.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-                  </div>
-                  {event.location && (
-                    <div className="flex items-center">
-                      <MapPin className="mr-1 h-3 w-3" />
-                      <span>{event.location}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <Link href={`/event/${event._id}`} className="sm:self-center">
-                <Button variant="outline" size="sm">
-                  View Details
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+        <Link key={event._id} href={`/event/${event._id}`}>
+          <EventCard event={event} type={getEventType(event)} />
+        </Link>
       ))}
     </div>
   )

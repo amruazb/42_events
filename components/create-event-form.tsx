@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
 import { useBroadcastChannel } from "@/hooks/use-broadcast-channel"
 import { useNotificationsContext } from "@/components/notifications-provider"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function CreateEventForm() {
   const [formData, setFormData] = useState({
@@ -19,6 +20,7 @@ export default function CreateEventForm() {
     date: "",
     location: "",
     tags: "",
+    type: "meetup", // Default type
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
@@ -28,6 +30,10 @@ export default function CreateEventForm() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleTypeChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, type: value }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,14 +51,20 @@ export default function CreateEventForm() {
     try {
       setIsSubmitting(true)
 
-      const eventData = {
-        ...formData,
-        tags: formData.tags
-          ? formData.tags
+      // Add the type as a tag
+      const tags = formData.tags
+        ? [
+            ...formData.tags
               .split(",")
               .map((tag) => tag.trim())
-              .filter(Boolean)
-          : [],
+              .filter(Boolean),
+            formData.type,
+          ]
+        : [formData.type]
+
+      const eventData = {
+        ...formData,
+        tags,
       }
 
       const response = await fetch("/api/events", {
@@ -99,6 +111,7 @@ export default function CreateEventForm() {
         date: "",
         location: "",
         tags: "",
+        type: "meetup",
       })
     } catch (error) {
       console.error("Error creating event:", error)
@@ -113,16 +126,37 @@ export default function CreateEventForm() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Create New Event</CardTitle>
+    <Card className="border-primary/20">
+      <CardHeader className="bg-primary/5">
+        <CardTitle className="text-primary">Create New Event</CardTitle>
         <CardDescription>Fill in the details to create a new event</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
+            <Label htmlFor="type">Event Type *</Label>
+            <Select value={formData.type} onValueChange={handleTypeChange}>
+              <SelectTrigger className="border-primary/50 focus:ring-primary">
+                <SelectValue placeholder="Select event type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="meetup">Meet up</SelectItem>
+                <SelectItem value="hackathon">Hackathon</SelectItem>
+                <SelectItem value="piscine">Piscine</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="title">Title *</Label>
-            <Input id="title" name="title" value={formData.title} onChange={handleChange} required />
+            <Input
+              id="title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+              className="border-primary/50 focus-visible:ring-primary"
+            />
           </div>
 
           <div className="space-y-2">
@@ -133,17 +167,32 @@ export default function CreateEventForm() {
               value={formData.description}
               onChange={handleChange}
               required
+              className="border-primary/50 focus-visible:ring-primary"
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="date">Date and Time *</Label>
-            <Input id="date" name="date" type="datetime-local" value={formData.date} onChange={handleChange} required />
+            <Input
+              id="date"
+              name="date"
+              type="datetime-local"
+              value={formData.date}
+              onChange={handleChange}
+              required
+              className="border-primary/50 focus-visible:ring-primary"
+            />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="location">Location</Label>
-            <Input id="location" name="location" value={formData.location} onChange={handleChange} />
+            <Input
+              id="location"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              className="border-primary/50 focus-visible:ring-primary"
+            />
           </div>
 
           <div className="space-y-2">
@@ -154,10 +203,11 @@ export default function CreateEventForm() {
               value={formData.tags}
               onChange={handleChange}
               placeholder="conference, workshop, meetup"
+              className="border-primary/50 focus-visible:ring-primary"
             />
           </div>
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
+          <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isSubmitting}>
             {isSubmitting ? "Creating..." : "Create Event"}
           </Button>
         </form>

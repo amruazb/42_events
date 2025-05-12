@@ -16,21 +16,29 @@ async function verifyToken(token: string) {
 export async function middleware(request: NextRequest) {
   // Check if the request is for the admin area
   if (request.nextUrl.pathname.startsWith("/admin")) {
+    // Skip middleware for login pages
+    if (
+      request.nextUrl.pathname === "/login" ||
+      request.nextUrl.pathname === "/login/admin" ||
+      request.nextUrl.pathname === "/login/user"
+    ) {
+      return NextResponse.next()
+    }
+
     // Get the token from cookies
     const token = request.cookies.get("auth-token")?.value
 
-    // If there's no token, we'll still allow access to the admin page
-    // The page itself will handle showing the login form
+    // If there's no token, redirect to admin login page
     if (!token) {
-      return NextResponse.next()
+      return NextResponse.redirect(new URL("/login/admin", request.url))
     }
 
     // If there is a token, verify it
     const payload = await verifyToken(token)
 
     if (!payload || payload.role !== "admin") {
-      // Invalid token or not an admin, redirect to home page
-      return NextResponse.redirect(new URL("/", request.url))
+      // Invalid token or not an admin, redirect to admin login page
+      return NextResponse.redirect(new URL("/login/admin", request.url))
     }
   }
 
@@ -51,9 +59,28 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Check if the request is for protected user routes
+  if (request.nextUrl.pathname.startsWith("/dashboard")) {
+    // Get the token from cookies
+    const token = request.cookies.get("auth-token")?.value
+
+    // If there's no token, redirect to user login page
+    if (!token) {
+      return NextResponse.redirect(new URL("/login/user", request.url))
+    }
+
+    // If there is a token, verify it
+    const payload = await verifyToken(token)
+
+    if (!payload) {
+      // Invalid token, redirect to user login page
+      return NextResponse.redirect(new URL("/login/user", request.url))
+    }
+  }
+
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/admin/:path*"],
+  matcher: ["/admin/:path*", "/api/admin/:path*", "/dashboard/:path*"],
 }

@@ -13,7 +13,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null
-  login: (username: string, password: string) => Promise<void>
+  login: (username: string, password: string) => Promise<User>
   logout: () => void
   isLoading: boolean
 }
@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAuth()
   }, [])
 
-  const login = async (username: string, password: string) => {
+  const login = async (username: string, password: string): Promise<User> => {
     setIsLoading(true)
 
     try {
