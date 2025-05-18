@@ -1,0 +1,97 @@
+.loginBox {
+  position: relative;
+  width: 100%;
+  max-width: 24rem;
+  background: transparent;
+  border-radius: 20px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.loginBox::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(
+    45deg,
+    #0066ff,
+    #00b3ff,
+    #4d94ff,
+    #80b3ff,
+    #b3d1ff,
+    #e6f0ff,
+    #ffffff,
+    #b3d1ff,
+    #80b3ff,
+    #4d94ff,
+    #00b3ff,
+    #0066ff
+  );
+  z-index: -1;
+  animation: rotate 4s linear infinite;
+  filter: blur(8px);
+}
+
+.loginBox::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  background: #1a1a1f;
+  border-radius: 16px;
+  z-index: -1;
+}
+
+.formContent {
+  position: relative;
+  z-index: 1;
+  padding: 2rem;
+  background: rgba(26, 26, 31, 0.95);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  color: #fff;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Input styles */
+.input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.input:focus {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 15px rgba(0, 102, 255, 0.2);
+}
+
+/* Button styles */
+.button {
+  background: linear-gradient(45deg, #0066ff, #4d94ff);
+  border: none;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.button:hover {
+  background: linear-gradient(45deg, #4d94ff, #0066ff);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(0, 102, 255, 0.3);
+}
+
+.button:active {
+  transform: translateY(0);
+} 
