@@ -19,6 +19,9 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["var(--font-press-start-2p)", "Inter", "sans-serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -79,6 +82,13 @@ const config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      boxShadow: {
+        'retro': '5px 5px 0px 0px rgba(0,0,0,0.8)', // Darker shadow
+      },
+      borderWidth: {
+        '3': '3px',
+        '5': '5px',
+      }
     },
   },
   plugins: [require("tailwindcss-animate")],

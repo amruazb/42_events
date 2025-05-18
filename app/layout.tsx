@@ -1,7 +1,7 @@
 import type React from "react"
 import "./globals.css"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Inter, Press_Start_2P } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { ServiceWorkerProvider } from "@/components/service-worker-provider"
@@ -11,6 +11,11 @@ import { AuthProvider } from "@/hooks/use-auth"
 import { SeedClient } from "./seed-client"
 
 const inter = Inter({ subsets: ["latin"] })
+const pressStart2P = Press_Start_2P({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-press-start-2p",
+})
 
 export const metadata: Metadata = {
   title: "Events Management App",
@@ -25,7 +30,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.className} ${pressStart2P.variable} font-sans`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>
             <NotificationsProvider>

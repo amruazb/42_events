@@ -7,62 +7,64 @@
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
-    --card: 0 0% 100%;
+    /* Adjusted for a more retro feel - slightly off-black/white */
+    --card: 0 0% 95%; /* Lighter card bg */
     --card-foreground: 222.2 84% 4.9%;
 
-    --popover: 0 0% 100%;
+    --popover: 0 0% 95%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 180 100% 37.5%;
-    --primary-foreground: 210 40% 98%;
+    /* Pixelated UIs often use bright, primary-like colors */
+    --primary: 200 100% 50%; /* Brighter Blue */
+    --primary-foreground: 0 0% 100%; /* White */
 
-    --secondary: 152 64% 57%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 50 100% 50%; /* Bright Yellow */
+    --secondary-foreground: 222.2 84% 4.9%; /* Dark Text */
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 30% 90%; /* Lighter Muted */
+    --muted-foreground: 215.4 16.3% 40%; /* Darker Muted Text */
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 30 100% 55%; /* Bright Orange */
+    --accent-foreground: 0 0% 100%; /* White */
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 214.3 31.8% 70%; /* More visible border */
+    --input: 214.3 31.8% 88%; /* Lighter input */
+    --ring: 200 100% 50%; /* Ring matches primary */
 
-    --radius: 0.5rem;
+    --radius: 0.25rem; /* Sharper corners */
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 220 20% 10%; /* Dark blue/grey */
+    --foreground: 210 40% 95%; /* Off-white text */
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 20% 15%;
+    --card-foreground: 210 40% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 20% 15%;
+    --popover-foreground: 210 40% 95%;
 
-    --primary: 180 100% 37.5%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 200 100% 60%; /* Brighter Blue for dark mode */
+    --primary-foreground: 0 0% 10%; /* Dark text on primary */
 
-    --secondary: 152 64% 57%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 50 100% 60%; /* Brighter Yellow for dark mode */
+    --secondary-foreground: 0 0% 10%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 15% 30%;
+    --muted-foreground: 210 30% 70%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 30 100% 65%; /* Brighter Orange for dark mode */
+    --accent-foreground: 0 0% 10%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 95%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 220 15% 40%; /* Visible border in dark mode */
+    --input: 220 15% 25%;
+    --ring: 200 100% 60%;
   }
 }
 
@@ -71,8 +73,29 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans; /* Ensure font-sans is applied */
+    /* Basic pixelated anti-aliasing for sharper text */
+    image-rendering: -moz-crisp-edges;
+    image-rendering: pixelated;
+    font-smooth: never;
+    -webkit-font-smoothing: none;
   }
+  /* General styling for buttons and inputs for a retro feel */
+  button, input[type="text"], input[type="email"], input[type="password"], select, textarea {
+    @apply border-3 border-black bg-background shadow-retro;
+    @apply px-2 py-1; /* Adjust padding for pixel look */
+  }
+  button:hover {
+    @apply bg-primary text-primary-foreground; /* Example hover */
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans; /* Ensure headings also use the pixel font */
+  }
+}
+
+/* Floating window style */
+.floating-window {
+  @apply border-5 border-foreground bg-background p-4 shadow-retro;
 }
 
 /* Event type styles */
