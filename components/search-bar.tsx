@@ -35,7 +35,7 @@ export default function SearchBar() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search events by title, description, or location..."
+            placeholder="       Search events by title, description, or location..."
             className="pl-10 pr-10 border-primary focus-visible:ring-primary"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
